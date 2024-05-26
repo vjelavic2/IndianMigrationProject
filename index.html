@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Migrations</title>
+    <link rel="stylesheet" href="style/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .no-data {
+            font-size: 40px;
+            color: #005500; /* Dark green color */
+            font-family: inherit; /* Same font as the title */
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-------NAVIGATION-------->
+    <div class="navigation-container" role="navigation">
+        <div class="navigation-middle">
+            <a href="#intro" class="name" aria-label="Intro" role="link">INDIAN MIGRATIONS</a>
+            <div class="links" role="navigation" aria-label="Navigation">
+                <a href="#" class="linkk" aria-label="1970s" role="link">1970s</a>
+                <a href="./1980s.html" class="linkk" aria-label="1980s" role="link">1980s</a>
+                <a href="./1990.html" class="linkk" aria-label="1990s" role="link">1990s</a>
+                <a href="./2000.html" class="linkk" aria-label="2000s" role="link">2000s</a>
+            </div>
+        </div>
+    </div>
+
+    <!---------------CONTENT----------->
+    <div class="content-box">
+        <div class="content-left">
+            <svg id="map"></svg>
+        </div>
+
+        <div class="content-right">
+
+            <div id="country-info">
+
+                <div class="no-mouse">
+                    <h2 class="diaspora" id="country-name">Diaspora</h2>
+                    <p class="no-data" id="no-data-msg">There is no data on the migrations of Indians in this country</p>
+                    <p class="opis" id="default-text">Every year 2.5 million Indians migrate overseas, which is </p>
+                    <p class="opis2" id="default-text2"><strong>the highest</strong> annual number of migrants in the world<strong><span class="red-text">!</span></strong></p>
+                </div>
+
+                <div class="line-chart" id="zaline">
+                    <div id="my_dataviz"></div>
+                </div>
+
+                <div class="two-container">
+                    <div class="violin-box" id="violin-box"></div>
+                    <div class="bar-box" id="bar-box"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="horizontal-bar" id="horizontal-bar">
+        <div id="total-bar"></div>
+    </div>
+
+    <script>
+        d3.json("finalworld.geojson").then(function (data) {
+            var width = 960;
+            var height = 600;
+            var svg = d3.select("#map")
+                .attr("width", width)
+                .attr("height", height);
+
+            var projection = d3.geoMercator()
+                .fitSize([width, height], data);
+
+            var path = d3.geoPath()
+                .projection(projection);
+
+            var colorScaleMap = d3.scaleLinear()
+                .domain([0, d3.max(data.features, function (d) {
+                    return d.properties.male70 + d.properties.female70;
+                })])
+                .range(["#ffa500", "#8b4513"])
+                .interpolate(d3.interpolateHsl);
+
+            svg.selectAll("path")
+                .data(data.features)
+                .enter().append("path")
+                .attr("d", path)
+                .attr("fill", function (d) {
+                    var totalMigration = d.properties.male70 + d.properties.female70;
+                    return totalMigration > 0 ? colorScaleMap(totalMigration) : "#eae2d3";
+                })
+                .attr("stroke", "white")
+                .on("mouseover", function (event, d) {
+                    var totalMigration = d.properties.male70 + d.properties.female70;
+                    d3.select("#country-name").text(d.properties.NAME);
+                    d3.select("#default-text").style("display", "none");
+                    d3.select("#default-text2").style("display", "none");
+
+                    if (totalMigration === 0) {
+                        d3.select("#no-data-msg").style("display", "block");
+                        d3.select("#zaline").style("display", "none");
+                        d3.select("#violin-box").style("display", "none");
+                        d3.select("#bar-box").style("display", "none");
+
+                        d3.select("#my_dataviz").selectAll("*").remove();
+                        d3.select("#violin-box").selectAll("*").remove();
+                        d3.select("#bar-box").selectAll("*").remove();
+                    } else {
+                        d3.select("#no-data-msg").style("display", "none");
+                        d3.select("#zaline").style("display", "block");
+                        d3.select("#violin-box").style("display", "block");
+                        d3.select("#bar-box").style("display", "block");
+
+                        var lineChartData = [
+                            { year: "1970", total: d.properties.male70 + d.properties.female70 },
+                            { year: "1980", total: d.properties.male80 + d.properties.female80 },
+                            { year: "1990", total: d.properties.male90 + d.properties.female90 },
+                            { year: "2000", total: d.properties.male00 + d.properties.female00 }
+                        ];
+
+                        drawLineChart(lineChartData);
+                        drawBarChart(d);
+                        drawPieChart(d);
+                    }
+                })
+                .on("mouseout", function (event, d) {
+                    d3.select("#country-name").text("Diaspora");
+                    d3.select("#default-text").style("display", "block");
+                    d3.select("#default-text2").style("display", "block");
+                    d3.select("#no-data-msg").style("display", "none");
+                    d3.select("#zaline").style("display", "none");
+                    d3.select("#violin-box").style("display", "none");
+                    d3.select("#bar-box").style("display", "none");
+
+                    d3.select("#my_dataviz").selectAll("*").remove();
+                    d3.select("#violin-box").selectAll("*").remove();
+                    d3.select("#bar-box").selectAll("*").remove();
+                });
+
+            /* LINECHART */
+            function drawLineChart(data) {
+                var margin = { top: 20, right: 20, bottom: 50, left: 70 },
+                    width = 500 - margin.left - margin.right,
+                    height = 300 - margin.top - margin.bottom;
+
+                var svg = d3.select("#my_dataviz").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var xScale = d3.scaleBand()
+                    .domain(data.map(function (d) { return d.year; }))
+                    .range([0, width])
+                    .padding(0.1);
+
+                var yScale = d3.scaleLinear()
+                    .domain([0, d3.max(data, function (d) { return d.total; })])
+                    .nice() // To make the domain end nicely rounded
+                    .range([height, 0]);
+
+                var line = d3.line()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; })
+                    .y(function (d) { return yScale(d.total); });
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "#be2805")
+                    .attr("stroke-width", 2)
+                    .attr("d", line)
+                    .call(transition);
+
+                function transition(path) {
+                    path.transition()
+                        .duration(2000)
+                        .attrTween("stroke-dasharray", function () {
+                            var length = this.getTotalLength();
+                            return function (t) {
+                                return (d3.interpolateString("0," + length, length + ",0"))(t);
+                            };
+                        });
+                }
+
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale));
+
+                svg.append("g")
+                    .call(d3.axisLeft(yScale).ticks(10).tickFormat(d3.format(".2s")));
+
+                // Add X axis label
+                svg.append("text")
+                    .attr("class", "x label")
+                    .attr("text-anchor", "middle")
+                    .attr("x", width / 2)
+                    .attr("y", height + margin.bottom - 10)
+                    .text("Years");
+
+                // Add Y axis label
+                svg.append("text")
+                    .attr("class", "y label")
+                    .attr("text-anchor", "middle")
+                    .attr("y", -margin.left + 20)
+                    .attr("x", -height / 2)
+                    .attr("dy", ".75em")
+                    .attr("transform", "rotate(-90)")
+                    .text("Number of Migrants");
+            }
+
+            /* PIE CHART */
+            function drawPieChart(data) {
+                var width = 200;
+                var height = 200;
+                var radius = Math.min(width, height) / 2;
+
+                var svg = d3.select("#violin-box").append("svg")
+                    .attr("width", width + 100) // Adjust width to accommodate the legend
+                    .attr("height", height)
+                    .append("g")
+                    .attr("transform", "translate(" + (radius + 50) + "," + height / 2 + ")"); // Adjust translation to center pie chart
+
+                var color = d3.scaleOrdinal()
+                    .domain(["Male", "Female"])
+                    .range(["#49596b", "#c5757f"]);
+
+                var pie = d3.pie()
+                    .value(function (d) { return d.value; });
+
+                var total = data.properties.male70 + data.properties.female70;
+                var data_ready = total === 0 ? [] : pie([{ gender: "Male", value: data.properties.male70 }, { gender: "Female", value: data.properties.female70 }]);
+
+                var arc = d3.arc()
+                    .innerRadius(0)
+                    .outerRadius(radius);
+
+                svg.selectAll('path')
+                    .data(data_ready)
+                    .enter()
+                    .append('path')
+                    .attr('d', arc)
+                    .attr('fill', function (d) { return color(d.data.gender); })
+                    .attr("stroke", "#eae2d3") // Cream color for the stroke
+                    .style("stroke-width", "2px");
+
+                svg.selectAll('text')
+                    .data(data_ready)
+                    .enter()
+                    .append('text')
+                    .attr("class", "custom-percentage") // Apply the custom style class
+                    .text(function (d) {
+                        var percentage = (d.data.value / total * 100).toFixed(2) + "%";
+                        return percentage;
+                    })
+                    .attr("transform", function (d) { return "translate(" + arc.centroid(d) + ")"; })
+                    .style("text-anchor", "middle");
+
+                // Legend
+                var legend = svg.append("g")
+                    .attr("transform", "translate(" + (-radius - 50) + "," + (height / 2 - 40) + ")");
+
+                var legendItems = legend.selectAll("g")
+                    .data(color.domain())
+                    .enter()
+                    .append("g")
+                    .attr("transform", function (d, i) { return "translate(0," + (i * 20) + ")"; });
+
+                legendItems.append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", 12)
+                    .attr("height", 12)
+                    .attr("fill", color);
+
+                legendItems.append("text")
+                    .attr("x", 20)
+                    .attr("y", 10)
+                    .text(function (d) { return d; })
+                    .style("font-size", 12)
+                    .attr("alignment-baseline", "middle");
+            }
+
+            /* BAR CHART */
+            function drawBarChart(data) {
+                var margin = { top: 10, right: 30, bottom: 40, left: 40 },
+                    width = 200 - margin.left - margin.right,
+                    height = 200 - margin.top - margin.bottom;
+
+                var svg = d3.select("#bar-box").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var x = d3.scaleBand().range([0, width]).domain(["Male", "Female"]).padding(0.2);
+                svg.append("g").attr("transform", "translate(0," + height + ")").call(d3.axisBottom(x));
+
+                var y = d3.scaleLinear().domain([0, d3.max([data.properties.male70, data.properties.female70])]).range([height, 0]);
+                svg.append("g").call(d3.axisLeft(y));
+
+                svg.selectAll("rect").data([{ gender: "Male", value: data.properties.male70 }, { gender: "Female", value: data.properties.female70 }])
+                    .enter().append("rect")
+                    .attr("x", d => x(d.gender))
+                    .attr("width", x.bandwidth())
+                    .attr("fill", d => d.gender === "Male" ? "#49596b" : "#c5757f")
+                    .attr("height", d => height - y(0))
+                    .attr("y", d => y(0))
+                    .transition().duration(800)
+                    .attr("y", d => y(d.value))
+                    .attr("height", d => height - y(d.value));
+            }
+
+            /* HORIZONTAL BAR CHART */
+            function drawHorizontalBarChart(data) {
+                var filteredData = data.features.filter(function (d) {
+                    return d.properties.male70 + d.properties.female70 > 0;
+                });
+
+                // Sort the filtered data by the total number of migrants in ascending order
+                filteredData.sort(function (a, b) {
+                    return (a.properties.male70 + a.properties.female70) - (b.properties.male70 + b.properties.female70);
+                });
+
+                var margin = { top: 10, right: 30, bottom: 40, left: 100 },
+                    width = 960 - margin.left - margin.right,
+                    height = 300 - margin.top - margin.bottom;
+
+                var svg = d3.select("#total-bar").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var x = d3.scaleLinear().range([0, width]).domain([0, d3.max(filteredData, function (d) {
+                    return d.properties.male70 + d.properties.female70;
+                })]);
+
+                var y = d3.scaleBand().range([height, 0]).domain(filteredData.map(function (d) {
+                    return d.properties.NAME;
+                })).padding(0.1);
+
+                svg.append("g").call(d3.axisLeft(y));
+                svg.append("g").attr("transform", "translate(0," + height + ")").call(d3.axisBottom(x));
+
+                svg.selectAll("rect").data(filteredData)
+                    .enter().append("rect")
+                    .attr("x", x(0))
+                    .attr("y", function (d) { return y(d.properties.NAME); })
+                    .attr("width", function (d) { return x(d.properties.male70 + d.properties.female70); })
+                    .attr("height", y.bandwidth())
+                    .attr("fill", "#69b3a2");
+            }
+
+            drawHorizontalBarChart(data);
+        });
+    </script>
+</body>
+
+</html>

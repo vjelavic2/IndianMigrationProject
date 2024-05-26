@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Migrations</title>
+    <link rel="stylesheet" href="../visualisation-project/style/style.css">
+</head>
+
+<body>
+
+    <!-------NAVIGATION-------->
+    <div class="navigation-container" role="navigation">
+
+        <div class="navigation-middle">
+            <a href="#intro" class="name" aria-label="Intro" role="link">INDIAN MIGRATIONS</a>
+            <div class="links" role="navigation" aria-label="Navigation">
+                <a href="./index.html" class="linkk" aria-label="1970s" role="link">1970s</a>
+                <a href="./1980s.html" class="linkk" aria-label="1980s" role="link">1980s</a>
+                <a href="#" class="linkk" aria-label="1990s" role="link">1990s</a>
+                <a href="./2000.html" class="linkk" aria-label="2000s" role="link">2000s</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        window.addEventListener('scroll', function () {
+            var navigationContainer = document.querySelector('.navigation-container');
+            if (window.scrollY > 0) {
+                navigationContainer.style.backgroundColor = 'white';
+            } else {
+                navigationContainer.style.backgroundColor = '';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

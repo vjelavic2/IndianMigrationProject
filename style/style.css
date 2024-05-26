@@ -1,0 +1,139 @@
+body {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+
+.navigation-container {
+    display: flex;
+    justify-content: center;
+    background-color: rgba(166, 171, 138, 255);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    text-align: center;
+}
+
+.navigation-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.name {
+    font-family: 'Libre Baskerville', serif;
+    text-decoration: none;
+    color: #eae2d3;
+    margin-bottom: 0;
+    font-weight: 700;
+    font-size: 50px;
+}
+
+.links {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-family: "Roboto Mono", monospace;
+    font-optical-sizing: auto;
+    margin-bottom: 3%;
+    padding: 0;
+    width: 80%;
+}
+
+.linkk {
+    color: #eae2d3;
+    text-decoration: none;
+    padding: 2%;
+    box-sizing: border-box;
+    margin: 0 10px;
+    font-size: 25px;
+}
+
+.linkk:hover {
+    background-color: #434835;
+    border-radius: 10%;
+}
+
+.content-box {
+    width: 100%;
+    margin-top: 85px;
+    height: calc(100vh - 75px);
+    display: flex;
+}
+
+.content-left,
+.content-right {
+    flex: 1;
+    display: flex;
+}
+
+.content-left {
+    justify-content: center;
+    align-items: center;
+}
+
+.content-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 45px;
+    box-sizing: border-box;
+    background-color: #eae2d3;
+    border-left: 1px solid #e0e0e0;
+}
+
+.diaspora {
+    margin-top: 0;
+    font-size: 55px;
+    font-family: "Roboto Mono", monospace;
+    color: #be2805;
+    
+    margin-bottom: 0;
+}
+
+.opis {
+    font-size: 35px;
+    font-family: "Roboto Mono", monospace;
+    font-weight: 100;
+    color: #434835;
+    margin-bottom: 0;
+}
+
+.opis2 {
+    font-size: 35px;
+    font-family: "Roboto Mono", monospace;
+    font-weight: 100;
+    color: #434835;
+    margin-bottom: 2%;
+    margin-top: 0;
+}
+
+.red-text {
+    color: #be2805;
+}
+
+.line-chart {
+    margin-top: 0;
+    background-color:rgba(166, 171, 138, 255);
+    height: 300px;
+    width: 500px;
+}
+
+.two-container {
+    display: flex;
+    width: 100%;
+    margin-top: 9px;
+}
+
+.violin-box,
+.bar-box {
+    flex: 1;
+}
+
+.horizontal-bar {
+    margin-top: 30px;
+    width: 100%;
+    background-color: #eae2d3;
+}
