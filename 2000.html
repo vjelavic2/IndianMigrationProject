@@ -235,7 +235,7 @@
                     return totalMigration > 0 ? colorScaleMap(totalMigration) : "#eae2d3";
                 })
                 .attr("stroke", "white")
-                .attr("stroke-width", 1) // Default stroke width
+                .attr("stroke-width", 1) 
                 .on("mouseover", function (event, d) {
                     var male70 = d.properties.male70 || 0;
                     var female70 = d.properties.female70 || 0;
@@ -279,7 +279,6 @@
                         drawPieChart({ male00, female00});
                     }
 
-                    // Change the stroke width to make the borders thicker on hover
                     d3.select(this).attr("stroke-width", 4);
                 })
                 .on("mouseout", function (event, d) {
@@ -295,7 +294,6 @@
                     d3.select("#violin-box").selectAll("*").remove();
                     d3.select("#bar-box").selectAll("*").remove();
 
-                    // Reset the stroke width when the mouse leaves the country
                     d3.select(this).attr("stroke-width", 1);
                 });
 
@@ -366,7 +364,6 @@
                 svg.append("g")
                     .call(d3.axisLeft(yScale).ticks(10).tickFormat(d3.format(".2s")));
 
-                // Add X axis label
                 svg.append("text")
                     .attr("class", "x label")
                     .attr("text-anchor", "middle")
@@ -374,7 +371,6 @@
                     .attr("y", height + margin.bottom - 10)
                     .text("Years");
 
-                // Add Y axis label
                 svg.append("text")
                     .attr("class", "y label")
                     .attr("text-anchor", "middle")
@@ -433,7 +429,6 @@
                     .style("fill", "#eae2d3")
                     .style("font-family", "inherit");
 
-                // Legend
                 var legend = svg.append("g")
                     .attr("transform", "translate(" + (-radius - 50) + "," + (height / 2 - 40) + ")");
 
